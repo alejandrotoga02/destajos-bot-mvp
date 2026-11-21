@@ -2,108 +2,102 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reporte de Destajo</title>
-  <!-- SDK obligatorio de Telegram Web Apps -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control de Destajos - Obra</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--tg-theme-bg-color, #ffffff);
-      color: var(--tg-theme-text-color, #000000);
-      padding: 16px;
-      margin: 0;
-    }
-    .card {
-      background: var(--tg-theme-secondary-bg-color, #f4f4f5);
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-    }
-    label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
-    select, input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      box-sizing: border-box;
-      margin-bottom: 12px;
-    }
-    .resumen {
-      font-size: 18px;
-      font-weight: bold;
-      color: #16a34a;
-      text-align: right;
-    }
-  </style>
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
 
-  <h3>🧱 Registro de Avance</h3>
-  
-  <div class="card">
-    <label for="obra">Obra asignada:</label>
-    <select id="obra">
-      <option value="Residencial Las Palmas">Residencial Las Palmas</option>
-      <option value="Torre Médica">Torre Médica</option>
-    </select>
-
-    <label for="trabajador">Albañil Destajista:</label>
-    <select id="trabajador">
-      <option value="Juan Pérez">Juan Pérez</option>
-      <option value="Carlos López">Carlos López</option>
-    </select>
-
-    <label for="concepto">Concepto a destajo:</label>
-    <select id="concepto" onchange="calcularTotal()">
-      <option value="180" data-nombre="Colado de losa (m²)">Colado de losa ($180 / m²)</option>
-      <option value="95" data-nombre="Aplanado de muros (m²)">Aplanado de muros ($95 / m²)</option>
-      <option value="120" data-nombre="Colocación de piso (m²)">Colocación de piso ($120 / m²)</option>
-    </select>
-
-    <label for="cantidad">Cantidad avanzada (m²):</label>
-    <input type="number" id="cantidad" placeholder="Ej. 25" oninput="calcularTotal()" min="1">
-
-    <div class="resumen">Total: $<span id="total">0</span> MXN</div>
+  <!-- Barra de Pestañas -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="cambiarTab('reportar', this)">📝 Reportar</button>
+    <button class="tab-btn" onclick="cambiarTab('historial', this)">📊 Historial (<span id="count-reportes">0</span>)</button>
+    <button class="tab-btn" onclick="cambiarTab('catalogos', this)">⚙️ Catálogos</button>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Expande la ventana al máximo alto disponible en Telegram
+  <div class="container">
 
-    // Configurar el botón principal nativo de Telegram (abajo en la pantalla)
-    tg.MainButton.text = "GUARDAR REPORTE";
-    tg.MainButton.show();
+    <!-- MÓDULO 1: CAPTURA -->
+    <div id="view-reportar" class="view active">
+      <div class="card">
+        <h3>🧱 Registro de Avance a Destajo</h3>
+        
+        <label>Obra Asignada</label>
+        <select id="sel-obra"></select>
 
-    function calcularTotal() {
-      const precio = parseFloat(document.getElementById('concepto').value) || 0;
-      const cantidad = parseFloat(document.getElementById('cantidad').value) || 0;
-      document.getElementById('total').innerText = (precio * cantidad).toLocaleString();
-    }
+        <label>Albañil / Destajista</label>
+        <select id="sel-albanil"></select>
 
-    // Acción al presionar el botón nativo de Telegram
-    tg.MainButton.onClick(() => {
-      const cantidad = parseFloat(document.getElementById('cantidad').value);
-      if (!cantidad || cantidad <= 0) {
-        tg.showAlert("Por favor ingresa una cantidad válida mayor a 0.");
-        return;
-      }
+        <label>Concepto de Obra</label>
+        <select id="sel-concepto" onchange="calcularTotal()"></select>
 
-      const selectConcepto = document.getElementById('concepto');
-      const nombreConcepto = selectConcepto.options[selectConcepto.selectedIndex].getAttribute('data-nombre');
+        <label>Cantidad Avanzada (<span id="lbl-unidad">m²</span>)</label>
+        <input type="number" id="inp-cantidad" placeholder="Ej. 24.5" step="0.1" min="0.1" oninput="calcularTotal()">
+
+        <div class="total-box">
+          <span>Subtotal estimado:</span>
+          <strong>$<span id="lbl-total">0.00</span></strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- MÓDULO 2: HISTORIAL Y CORTES -->
+    <div id="view-historial" class="view">
+      <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 11px; color: var(--hint); text-transform: uppercase; font-weight: 700;">Acumulado Global</div>
+          <div style="font-size: 22px; font-weight: bold; color: var(--success);">$<span id="gran-total">0.00</span></div>
+        </div>
+        <button class="btn btn-danger" onclick="limpiarHistorial()">Vaciar Historial</button>
+      </div>
+
+      <div class="card">
+        <h3>📋 Historial de Avances</h3>
+        <div id="lista-reportes"></div>
+      </div>
+    </div>
+
+    <!-- MÓDULO 3: CONFIGURACIÓN DE CATÁLOGOS -->
+    <div id="view-catalogos" class="view">
       
-      const payload = {
-        obra: document.getElementById('obra').value,
-        trabajador: document.getElementById('trabajador').value,
-        concepto: nombreConcepto,
-        cantidad: cantidad,
-        total: document.getElementById('total').innerText
-      };
+      <!-- Obras -->
+      <div class="card">
+        <h3>🏗 Obras Activas</h3>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="new-obra" placeholder="Nombre de nueva obra..." style="margin-bottom: 0;">
+          <button class="btn" style="width: auto;" onclick="agregarObra()">Agregar</button>
+        </div>
+        <div id="list-obras" style="margin-top: 12px;"></div>
+      </div>
 
-      // Envía los datos de vuelta al bot en formato JSON y cierra la Mini App
-      tg.sendData(JSON.stringify(payload));
-    });
-  </script>
+      <!-- Albañiles -->
+      <div class="card">
+        <h3>👷 Albañiles Destajistas</h3>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="new-albanil" placeholder="Nombre del albañil..." style="margin-bottom: 0;">
+          <button class="btn" style="width: auto;" onclick="agregarAlbanil()">Agregar</button>
+        </div>
+        <div id="list-albaniles" style="margin-top: 12px;"></div>
+      </div>
+
+      <!-- Conceptos -->
+      <div class="card">
+        <h3>📐 Conceptos y Precios Unitarios</h3>
+        <input type="text" id="new-concepto-nombre" placeholder="Concepto (ej. Colocación de loseta)">
+        <div class="row-2">
+          <input type="text" id="new-concepto-unidad" placeholder="Unidad (ej. m², pza, ml)">
+          <input type="number" id="new-concepto-precio" placeholder="Precio ($)">
+        </div>
+        <button class="btn" onclick="agregarConcepto()">Agregar Concepto</button>
+        <div id="list-conceptos" style="margin-top: 12px;"></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Controlador principal -->
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,132 @@
+:root {
+  --bg: var(--tg-theme-bg-color, #f1f5f9);
+  --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
+  --text: var(--tg-theme-text-color, #0f172a);
+  --hint: var(--tg-theme-hint-color, #64748b);
+  --primary: var(--tg-theme-button-color, #2563eb);
+  --primary-text: var(--tg-theme-button-text-color, #ffffff);
+  --border: #cbd5e1;
+  --success: #16a34a;
+  --danger: #dc2626;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0 0 90px 0; }
+
+/* Navegación por Pestañas (Sticky) */
+.tabs {
+  display: flex;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.tab-btn {
+  flex: 1;
+  padding: 14px 8px;
+  border: none;
+  background: none;
+  color: var(--hint);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.container { padding: 16px; max-width: 600px; margin: 0 auto; }
+.view { display: none; animation: fadeIn 0.2s ease-in-out; }
+.view.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tarjetas */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid var(--border);
+}
+h3 { margin: 0 0 12px 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+/* Formularios Ergonómicos */
+label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: var(--hint); text-transform: uppercase; letter-spacing: 0.5px; }
+select, input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 16px; /* Evita zoom automático en iOS */
+  margin-bottom: 14px;
+}
+select:focus, input:focus {
+  outline: 2px solid var(--primary);
+  border-color: transparent;
+}
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--primary);
+  color: var(--primary-text);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+.btn:active { transform: scale(0.98); }
+.btn-danger { background: #fee2e2; color: var(--danger); padding: 8px 12px; font-size: 12px; width: auto; box-shadow: none; }
+
+/* Resumen Dinámico */
+.total-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 16px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.total-box span { color: #166534; font-weight: 600; font-size: 14px; }
+.total-box strong { color: var(--success); font-size: 22px; }
+
+/* Historial y Listas */
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.list-item:last-child { border-bottom: none; }
+.badge { background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.report-card {
+  border-left: 4px solid var(--primary);
+  padding-left: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.report-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+.report-meta { font-size: 12px; color: var(--hint); margin: 4px 0; }
+.report-money { color: var(--success); font-weight: bold; font-size: 16px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
