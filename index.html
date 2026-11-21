@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Destajo</title>
+  <!-- SDK obligatorio de Telegram Web Apps -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
+      padding: 16px;
+      margin: 0;
+    }
+    .card {
+      background: var(--tg-theme-secondary-bg-color, #f4f4f5);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    label { display: block; font-weight: bold; margin-bottom: 6px; font-size: 14px; }
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+    }
+    .resumen {
+      font-size: 18px;
+      font-weight: bold;
+      color: #16a34a;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>🧱 Registro de Avance</h3>
+  
+  <div class="card">
+    <label for="obra">Obra asignada:</label>
+    <select id="obra">
+      <option value="Residencial Las Palmas">Residencial Las Palmas</option>
+      <option value="Torre Médica">Torre Médica</option>
+    </select>
+
+    <label for="trabajador">Albañil Destajista:</label>
+    <select id="trabajador">
+      <option value="Juan Pérez">Juan Pérez</option>
+      <option value="Carlos López">Carlos López</option>
+    </select>
+
+    <label for="concepto">Concepto a destajo:</label>
+    <select id="concepto" onchange="calcularTotal()">
+      <option value="180" data-nombre="Colado de losa (m²)">Colado de losa ($180 / m²)</option>
+      <option value="95" data-nombre="Aplanado de muros (m²)">Aplanado de muros ($95 / m²)</option>
+      <option value="120" data-nombre="Colocación de piso (m²)">Colocación de piso ($120 / m²)</option>
+    </select>
+
+    <label for="cantidad">Cantidad avanzada (m²):</label>
+    <input type="number" id="cantidad" placeholder="Ej. 25" oninput="calcularTotal()" min="1">
+
+    <div class="resumen">Total: $<span id="total">0</span> MXN</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Expande la ventana al máximo alto disponible en Telegram
+
+    // Configurar el botón principal nativo de Telegram (abajo en la pantalla)
+    tg.MainButton.text = "GUARDAR REPORTE";
+    tg.MainButton.show();
+
+    function calcularTotal() {
+      const precio = parseFloat(document.getElementById('concepto').value) || 0;
+      const cantidad = parseFloat(document.getElementById('cantidad').value) || 0;
+      document.getElementById('total').innerText = (precio * cantidad).toLocaleString();
+    }
+
+    // Acción al presionar el botón nativo de Telegram
+    tg.MainButton.onClick(() => {
+      const cantidad = parseFloat(document.getElementById('cantidad').value);
+      if (!cantidad || cantidad <= 0) {
+        tg.showAlert("Por favor ingresa una cantidad válida mayor a 0.");
+        return;
+      }
+
+      const selectConcepto = document.getElementById('concepto');
+      const nombreConcepto = selectConcepto.options[selectConcepto.selectedIndex].getAttribute('data-nombre');
+      
+      const payload = {
+        obra: document.getElementById('obra').value,
+        trabajador: document.getElementById('trabajador').value,
+        concepto: nombreConcepto,
+        cantidad: cantidad,
+        total: document.getElementById('total').innerText
+      };
+
+      // Envía los datos de vuelta al bot en formato JSON y cierra la Mini App
+      tg.sendData(JSON.stringify(payload));
+    });
+  </script>
+</body>
+</html>
